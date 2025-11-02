@@ -109,3 +109,4 @@ docker compose logs -f
 ✅ Automatic deployment configured and ready!
 
 Push to `main` branch to trigger deployment.
+# Test 2
