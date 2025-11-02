@@ -1,17 +1,20 @@
-import { AzureOpenAI } from 'openai';
+import { VertexAI } from '@google-cloud/vertexai';
 
-let openai;
+let vertexAI;
+let model;
 
-function getOpenAI() {
-  if (!openai) {
-    openai = new AzureOpenAI({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-      apiVersion: process.env.AZURE_OPENAI_API_VERSION,
-      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
+function getGemini() {
+  if (!vertexAI) {
+    vertexAI = new VertexAI({
+      project: process.env.GCP_PROJECT_ID,
+      location: process.env.GCP_LOCATION,
+    });
+    
+    model = vertexAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
     });
   }
-  return openai;
+  return model;
 }
 
 // Define your team members and their specialties
@@ -80,13 +83,19 @@ CRITICAL DISTINCTION:
 
 Return ONLY the email address(es). For multiple recipients, separate with commas (no spaces).`;
 
-  const response = await getOpenAI().chat.completions.create({
-    model: process.env.AZURE_OPENAI_DEPLOYMENT,
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.1,
-  });
+  const gemini = getGemini();
+  
+  const request = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 256,
+    },
+  };
 
-  const selectedEmails = response.choices[0].message.content.trim();
+  const response = await gemini.generateContent(request);
+  const selectedEmails = response.response.candidates[0].content.parts[0].text.trim();
+  
   console.log('🤖 AI selected:', selectedEmails);
   
   // Handle multiple emails separated by commas

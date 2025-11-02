@@ -1,17 +1,20 @@
-import { AzureOpenAI } from 'openai';
+import { VertexAI } from '@google-cloud/vertexai';
 
-let openai;
+let vertexAI;
+let model;
 
-function getOpenAI() {
-  if (!openai) {
-    openai = new AzureOpenAI({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-      apiVersion: process.env.AZURE_OPENAI_API_VERSION,
-      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
+function getGemini() {
+  if (!vertexAI) {
+    vertexAI = new VertexAI({
+      project: process.env.GCP_PROJECT_ID,
+      location: process.env.GCP_LOCATION,
+    });
+    
+    model = vertexAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
     });
   }
-  return openai;
+  return model;
 }
 
 export async function summarizeCall(payload) {
@@ -29,7 +32,7 @@ export async function summarizeCall(payload) {
 Transcript:
 ${transcript}
 
-Return your response in this JSON format:
+Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no markdown or code blocks):
 {
   "dateOfCall": "YYYY-MM-DD",
   "timeOfCall": "HH:MM AM/PM",
@@ -40,14 +43,25 @@ Return your response in this JSON format:
   "actionItems": ["..."]
 }`;
 
-  const response = await getOpenAI().chat.completions.create({
-    model: process.env.AZURE_OPENAI_DEPLOYMENT,
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.3,
-  });
+  const gemini = getGemini();
+  
+  const request = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 2048,
+      responseMimeType: 'application/json', // Force JSON response
+    },
+  };
 
-  const result = JSON.parse(response.choices[0].message.content);
+  console.log('🤖 Calling Gemini...');
+  const response = await gemini.generateContent(request);
+  
+  // Extract the text response
+  const responseText = response.response.candidates[0].content.parts[0].text;
+  
+  // Parse JSON response
+  const result = JSON.parse(responseText);
   
   // Convert to Pacific Time if we have a timestamp from VAPI
   let callTimePacific = result.timeOfCall;
@@ -84,6 +98,7 @@ Return your response in this JSON format:
   console.log(`   Caller: ${finalResult.callerName} (${finalResult.callerPhone})`);
   console.log(`   Type: ${finalResult.callerType}`);
   console.log(`   Date/Time: ${finalResult.dateOfCall} ${finalResult.timeOfCall}`);
+  console.log(`   Model: ${process.env.GEMINI_MODEL || 'gemini-1.5-pro'} ✨`);
   
   return finalResult;
 }

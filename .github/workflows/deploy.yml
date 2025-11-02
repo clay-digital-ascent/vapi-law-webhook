@@ -54,7 +54,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }},AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }},AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }},AZURE_OPENAI_API_VERSION=${{ secrets.AZURE_OPENAI_API_VERSION }},OPENAI_API_VERSION=${{ secrets.OPENAI_API_VERSION }},EMAIL_HOST=${{ secrets.EMAIL_HOST }},EMAIL_PORT=${{ secrets.EMAIL_PORT }},EMAIL_SECURE=${{ secrets.EMAIL_SECURE }},EMAIL_USER=${{ secrets.EMAIL_USER }},EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }},EMAIL_FROM=${{ secrets.EMAIL_FROM }},VAPI_WEBHOOK_SECRET=${{ secrets.VAPI_WEBHOOK_SECRET }},NODE_ENV=production"
+            --set-env-vars "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }},AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }},AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }},AZURE_OPENAI_API_VERSION=${{ secrets.AZURE_OPENAI_API_VERSION }},OPENAI_API_VERSION=${{ secrets.OPENAI_API_VERSION }},EMAIL_HOST=${{ secrets.EMAIL_HOST }},EMAIL_PORT=${{ secrets.EMAIL_PORT }},EMAIL_SECURE=${{ secrets.EMAIL_SECURE }},EMAIL_USER=${{ secrets.EMAIL_USER }},EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }},EMAIL_FROM=${{ secrets.EMAIL_FROM }},VAPI_WEBHOOK_SECRET=${{ secrets.VAPI_WEBHOOK_SECRET }},GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},GCP_LOCATION=${{ secrets.GCP_LOCATION }},GEMINI_MODEL=${{ secrets.GEMINI_MODEL }},NODE_ENV=production"
 
       - name: Show Service URL
         run: |
