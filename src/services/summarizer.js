@@ -49,7 +49,7 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0.3,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 8192,
       responseMimeType: 'application/json', // Force JSON response
     },
   };
