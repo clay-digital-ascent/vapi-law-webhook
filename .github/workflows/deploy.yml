@@ -1,0 +1,64 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: reardon-injury-law
+  REGION: us-central1
+  SERVICE_NAME: vapi-webhook-service
+  REPOSITORY: vapi-webhook-repo
+  IMAGE_NAME: vapi-law-webhook
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: github-actions@reardon-injury-law.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build \
+            --platform linux/amd64 \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
+            .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --set-env-vars "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }},AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }},AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }},AZURE_OPENAI_API_VERSION=${{ secrets.AZURE_OPENAI_API_VERSION }},OPENAI_API_VERSION=${{ secrets.OPENAI_API_VERSION }},EMAIL_HOST=${{ secrets.EMAIL_HOST }},EMAIL_PORT=${{ secrets.EMAIL_PORT }},EMAIL_SECURE=${{ secrets.EMAIL_SECURE }},EMAIL_USER=${{ secrets.EMAIL_USER }},EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }},EMAIL_FROM=${{ secrets.EMAIL_FROM }},VAPI_WEBHOOK_SECRET=${{ secrets.VAPI_WEBHOOK_SECRET }},NODE_ENV=production"
+
+      - name: Show Service URL
+        run: |
+          gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --format 'value(status.url)'
