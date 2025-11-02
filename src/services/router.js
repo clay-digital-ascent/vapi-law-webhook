@@ -63,8 +63,7 @@ ${JSON.stringify(TEAM_MEMBERS, null, 2)}
 Routing Rules (in priority order - check top rules first):
 1. ABSOLUTE HIGHEST PRIORITY: If the caller is a potential new client, send to ALL USERS (all 5 email addresses). This rule ALWAYS takes precedence over everything else, including name mentions. Return: victoria@reardoninjurylaw.com,mike@reardoninjurylaw.com,john@reardoninjurylaw.com,clay@reardoninjurylaw.com,admin@reardoninjurylaw.com
 
-2. If the caller specifically REQUESTS to speak with a team member by name (e.g., "I need to speak with Kennedy", "Can I talk to Mike?", "Is Victoria available?"), send to that person AND Victoria Quezada. Return both email addresses separated by comma.
-   IMPORTANT: This does NOT apply if the caller is simply introducing themselves (e.g., "My name is Clay" or "I'm Mike"). Only apply this rule if they are ASKING FOR a team member.
+2. If the caller specifically REQUESTS to speak with a team member by name or wants to leave a message with that team member, send to that person who was specified AND Victoria Quezada. Return both email addresses separated by comma.
 
 3. If the caller is a current client, send to Victoria Quezada
 4. If the caller is a provider, send to Victoria Quezada
