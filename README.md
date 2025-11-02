@@ -104,3 +104,8 @@ For issues or questions, check the console logs:
 ```bash
 docker compose logs -f
 ```
+
+## 🎉 CI/CD Status
+✅ Automatic deployment configured and ready!
+
+Push to `main` branch to trigger deployment.
