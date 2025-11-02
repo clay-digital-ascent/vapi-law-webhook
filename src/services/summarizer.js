@@ -25,8 +25,8 @@ export async function summarizeCall(payload) {
 - Date and time of call (convert to Pacific Time if timestamp is provided in a different timezone)
 - Caller's Name
 - Caller's phone number
-- Type of caller (current client, potential new client, provider, insurance adjuster)
-- Brief summary of the call (2-3 sentences)
+- Type of caller (current client, potential new client, provider, insurance adjuster, other)
+- Brief summary of the call (2-3 sentences, unless there is a lot of details, of course you can write more sentences.)
 - Key action items or follow-up needed
 
 Transcript:
@@ -38,7 +38,7 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   "timeOfCall": "HH:MM AM/PM",
   "callerName": "...",
   "callerPhone": "...",
-  "callerType": "current client/potential new client/provider/insurance adjuster",
+  "callerType": "current client/potential new client/provider/insurance adjuster/other",
   "summary": "...",
   "actionItems": ["..."]
 }`;
