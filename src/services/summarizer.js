@@ -36,7 +36,12 @@ export async function summarizeCall(payload) {
    - "insurance adjuster" = Insurance company representative calling about a claim. Must identify as adjuster or from insurance company.
    - "other" = DEFAULT for: spam, solicitations, wrong numbers, vague inquiries, unclear purpose, robocalls, marketing, or anything that doesn't clearly fit above categories
 
-4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call
+4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call. IMPORTANT: If the caller requests a callback, include ALL contact details they provide:
+   - Phone number they want to be called back at (even if it's the same as caller phone)
+   - Extension number if mentioned
+   - Best time to call if specified
+   - Any other callback instructions (e.g., "ask for John", "call after 3pm")
+   
 5. **Action Items**: List specific follow-up actions needed
 
 CRITICAL: Only classify as "potential new client" if you are HIGHLY CONFIDENT they have an injury/accident AND are seeking legal representation. When in doubt, use "other".
