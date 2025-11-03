@@ -1,19 +1,19 @@
 import { VertexAI } from '@google-cloud/vertexai';
 
-let vertexAI;
-let model;
+// Pre-initialize Vertex AI client at module load time (not on first request)
+// This happens when the container starts, not when the first request arrives
+console.log('⚡ Initializing Vertex AI client...');
+const vertexAI = new VertexAI({
+  project: process.env.GCP_PROJECT_ID,
+  location: process.env.GCP_LOCATION,
+});
+
+const model = vertexAI.getGenerativeModel({
+  model: process.env.GEMINI_MODEL || 'gemini-2.0-flash-001',
+});
+console.log(`✅ Vertex AI client ready (model: ${process.env.GEMINI_MODEL || 'gemini-2.0-flash-001'})`);
 
 function getGemini() {
-  if (!vertexAI) {
-    vertexAI = new VertexAI({
-      project: process.env.GCP_PROJECT_ID,
-      location: process.env.GCP_LOCATION,
-    });
-    
-    model = vertexAI.getGenerativeModel({
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
-    });
-  }
   return model;
 }
 
