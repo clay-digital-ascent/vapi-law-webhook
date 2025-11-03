@@ -20,6 +20,11 @@ function getGemini() {
 export async function summarizeCall(payload) {
   const transcript = extractTranscript(payload);
   
+  // Log transcript info for debugging
+  const transcriptLength = transcript.length;
+  const estimatedTokens = Math.ceil(transcriptLength / 4); // Rough estimate: 1 token ≈ 4 chars
+  console.log(`📝 Transcript length: ${transcriptLength} characters (~${estimatedTokens} tokens)`);
+  
   const prompt = `You are an AI assistant for Reardon Injury Law. Analyze this phone call transcript and intelligently determine:
 
 1. **Caller Name**: Extract from the conversation (or "Unknown" if not provided)
@@ -62,7 +67,17 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   };
 
   console.log('🤖 Calling Gemini...');
+  const startTime = Date.now();
   const response = await gemini.generateContent(request);
+  const endTime = Date.now();
+  const duration = ((endTime - startTime) / 1000).toFixed(2);
+  
+  // Log token usage
+  const usage = response.response.usageMetadata;
+  console.log(`⚡ Gemini response time: ${duration}s`);
+  if (usage) {
+    console.log(`📊 Token usage: ${usage.promptTokenCount} input + ${usage.candidatesTokenCount} output = ${usage.totalTokenCount} total`);
+  }
   
   // Extract the text response
   const responseText = response.response.candidates[0].content.parts[0].text;
@@ -111,10 +126,42 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
 }
 
 function extractTranscript(payload) {
-  // VAPI sends different structures, adjust based on actual payload
-  if (payload.transcript) return payload.transcript;
-  if (payload.messages) return payload.messages.map(m => `${m.role}: ${m.content}`).join('\n');
-  if (payload.call?.transcript) return payload.call.transcript;
+  // VAPI end-of-call-report structure
+  // Try different possible locations for the transcript
   
+  // Most common: payload.message.transcript
+  if (payload.message?.transcript) {
+    console.log('✅ Found transcript in payload.message.transcript');
+    return payload.message.transcript;
+  }
+  
+  // Alternative: payload.transcript
+  if (payload.transcript) {
+    console.log('✅ Found transcript in payload.transcript');
+    return payload.transcript;
+  }
+  
+  // Alternative: payload.call.transcript
+  if (payload.call?.transcript) {
+    console.log('✅ Found transcript in payload.call.transcript');
+    return payload.call.transcript;
+  }
+  
+  // Alternative: payload.messages (array format)
+  if (payload.messages && Array.isArray(payload.messages)) {
+    console.log('✅ Found transcript in payload.messages (array)');
+    return payload.messages.map(m => `${m.role}: ${m.content}`).join('\n');
+  }
+  
+  // Alternative: payload.message.call.transcript
+  if (payload.message?.call?.transcript) {
+    console.log('✅ Found transcript in payload.message.call.transcript');
+    return payload.message.call.transcript;
+  }
+  
+  // Fallback: dump entire payload for debugging
+  console.warn('⚠️  Could not find transcript in expected locations, using full payload');
+  console.warn('Payload keys:', Object.keys(payload));
+  if (payload.message) console.warn('Message keys:', Object.keys(payload.message));
   return JSON.stringify(payload, null, 2);
 }
