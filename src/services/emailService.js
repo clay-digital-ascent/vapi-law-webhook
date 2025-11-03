@@ -96,14 +96,6 @@ export async function sendEmail(recipient, summary, rawPayload) {
                 <td style="padding: 10px 0; color: #666; font-size: 14px;"><strong>Time:</strong></td>
                 <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">${summary.timeOfCall || 'Not provided'} (Pacific Time)</td>
               </tr>
-              ${summary.recordingUrl ? `
-              <tr>
-                <td style="padding: 10px 0; color: #666; font-size: 14px;"><strong>Recording:</strong></td>
-                <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
-                  <a href="${summary.recordingUrl}" style="color: ${borderColor}; text-decoration: none; font-weight: 500;">🎤 Listen to Recording</a>
-                </td>
-              </tr>
-              ` : ''}
             </table>
           </div>
           
@@ -132,6 +124,11 @@ export async function sendEmail(recipient, summary, rawPayload) {
           <div style="margin-bottom: 30px;">
             <h2 style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0 0 15px 0; border-bottom: 2px solid ${borderColor}; padding-bottom: 8px;">Call Summary</h2>
             <p style="color: #1a1a1a; font-size: 14px; line-height: 1.6; margin: 0; background-color: #f8f9fa; padding: 15px; border-radius: 8px;">${summary.summary || 'No summary available'}</p>
+            ${summary.recordingUrl ? `
+            <div style="margin-top: 12px; text-align: center;">
+              <a href="${summary.recordingUrl}" style="display: inline-block; background-color: ${borderColor}; color: #ffffff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px;">Listen to Recording</a>
+            </div>
+            ` : ''}
           </div>
           
           ${summary.actionItems && summary.actionItems.length > 0 ? `
