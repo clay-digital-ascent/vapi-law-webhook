@@ -85,16 +85,39 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   // Parse JSON response
   const result = JSON.parse(responseText);
   
-  // Convert to Pacific Time if we have a timestamp from VAPI
-  let callTimePacific = result.timeOfCall;
-  if (payload.call?.startedAt || payload.timestamp) {
-    const timestamp = new Date(payload.call?.startedAt || payload.timestamp);
-    callTimePacific = timestamp.toLocaleString('en-US', { 
+  // Extract date and time from VAPI payload metadata
+  let callDate = result.dateOfCall;
+  let callTime = result.timeOfCall;
+  
+  // Try different possible locations for the timestamp
+  const timestamp = payload.message?.call?.startedAt || 
+                   payload.call?.startedAt || 
+                   payload.message?.startedAt ||
+                   payload.startedAt ||
+                   payload.timestamp;
+  
+  if (timestamp) {
+    const date = new Date(timestamp);
+    
+    // Format date as YYYY-MM-DD
+    callDate = date.toLocaleDateString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).split('/').reverse().join('-').replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1-$3-$2');
+    
+    // Format time as HH:MM AM/PM Pacific
+    callTime = date.toLocaleString('en-US', { 
       timeZone: 'America/Los_Angeles',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
-    });
+    }).replace(/^.*?, /, ''); // Remove date part, keep only time
+    
+    console.log(`📅 Extracted timestamp: ${timestamp} -> ${callDate} ${callTime} PT`);
+  } else {
+    console.warn('⚠️  No timestamp found in payload, using Gemini extraction');
   }
   
   // Try to extract phone number from VAPI payload if not in transcript
@@ -112,7 +135,8 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   const finalResult = {
     ...result,
     callerPhone: phoneNumber,
-    timeOfCall: callTimePacific,
+    dateOfCall: callDate,
+    timeOfCall: callTime,
     processedAt: new Date().toISOString(),
   };
   
