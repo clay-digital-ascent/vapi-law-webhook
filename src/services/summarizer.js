@@ -124,12 +124,21 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   let phoneNumber = result.callerPhone;
   if (!phoneNumber || phoneNumber === 'Not provided') {
     // Check various possible locations in VAPI payload
-    phoneNumber = payload.call?.customer?.number || 
+    phoneNumber = payload.message?.call?.customer?.number ||
+                  payload.message?.customer?.number ||
+                  payload.call?.customer?.number || 
                   payload.call?.phoneNumber || 
                   payload.customer?.number ||
                   payload.phoneNumber ||
                   payload.call?.from ||
+                  payload.message?.phoneNumber ||
+                  payload.message?.call?.phoneNumber ||
                   'Not provided';
+    
+    console.log('📞 Phone extraction attempt:');
+    console.log('  payload.message?.call?.customer?.number:', payload.message?.call?.customer?.number);
+    console.log('  payload.call?.customer?.number:', payload.call?.customer?.number);
+    console.log('  Final phone:', phoneNumber);
   }
   
   const finalResult = {
