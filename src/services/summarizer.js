@@ -20,14 +20,21 @@ function getGemini() {
 export async function summarizeCall(payload) {
   const transcript = extractTranscript(payload);
   
-  const prompt = `You are an assistant for a law firm. Analyze this phone call transcript and extract:
+  const prompt = `You are an AI assistant for Reardon Injury Law. Analyze this phone call transcript and intelligently determine:
 
-- Date and time of call (convert to Pacific Time if timestamp is provided in a different timezone)
-- Caller's Name
-- Caller's phone number
-- Type of caller (current client, potential new client, provider, insurance adjuster, other)
-- Brief summary of the call (2-3 sentences, unless there is a lot of details, of course you can write more sentences.)
-- Key action items or follow-up needed
+1. **Caller Name**: Extract from the conversation (or "Unknown" if not provided)
+2. **Caller Phone**: Extract if mentioned (or "Not provided")
+3. **Caller Type**: Intelligently infer from context:
+   - "potential new client" = Someone inquiring about legal services for a NEW case/injury they haven't hired the firm for yet. Keywords: "I was injured", "I had an accident", "I need a lawyer", "looking for representation", "can you help me with my case"
+   - "current client" = Someone with an EXISTING case already being handled by the firm. Keywords: "my case", "update on my claim", "spoke with Victoria before", "following up", mentions case number or existing representation
+   - "provider" = Medical provider, doctor's office, hospital, physical therapist, chiropractor calling about records, bills, liens, or treatment. Keywords: "medical records", "treatment notes", "billing", "lien", "doctor's office", "hospital", "clinic"
+   - "insurance adjuster" = Insurance company representative. Keywords: "insurance adjuster", "claims adjuster", "settlement offer", "insurance company", mentions specific insurance carrier names
+   - "other" = Anyone else (solicitor, wrong number, general inquiry, spam, etc.)
+
+4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call
+5. **Action Items**: List specific follow-up actions needed
+
+IMPORTANT: The caller will NOT explicitly state their type. You must infer it from what they say about their situation.
 
 Transcript:
 ${transcript}
@@ -36,11 +43,11 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
 {
   "dateOfCall": "YYYY-MM-DD",
   "timeOfCall": "HH:MM AM/PM",
-  "callerName": "...",
-  "callerPhone": "...",
-  "callerType": "current client/potential new client/provider/insurance adjuster/other",
-  "summary": "...",
-  "actionItems": ["..."]
+  "callerName": "Unknown",
+  "callerPhone": "Not provided",
+  "callerType": "potential new client",
+  "summary": "Detailed summary here",
+  "actionItems": ["Action 1", "Action 2"]
 }`;
 
   const gemini = getGemini();
