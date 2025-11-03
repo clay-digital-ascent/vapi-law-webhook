@@ -96,6 +96,14 @@ export async function sendEmail(recipient, summary, rawPayload) {
                 <td style="padding: 10px 0; color: #666; font-size: 14px;"><strong>Time:</strong></td>
                 <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">${summary.timeOfCall || 'Not provided'} (Pacific Time)</td>
               </tr>
+              ${summary.recordingUrl ? `
+              <tr>
+                <td style="padding: 10px 0; color: #666; font-size: 14px;"><strong>Recording:</strong></td>
+                <td style="padding: 10px 0; color: #1a1a1a; font-size: 14px;">
+                  <a href="${summary.recordingUrl}" style="color: ${borderColor}; text-decoration: none; font-weight: 500;">🎤 Listen to Recording</a>
+                </td>
+              </tr>
+              ` : ''}
             </table>
           </div>
           

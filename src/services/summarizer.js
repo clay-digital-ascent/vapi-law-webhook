@@ -29,17 +29,17 @@ export async function summarizeCall(payload) {
 
 1. **Caller Name**: Extract from the conversation (or "Unknown" if not provided)
 2. **Caller Phone**: Extract if mentioned (or "Not provided")
-3. **Caller Type**: Intelligently infer from context:
-   - "potential new client" = Someone inquiring about legal services for a NEW case/injury they haven't hired the firm for yet. Keywords: "I was injured", "I had an accident", "I need a lawyer", "looking for representation", "can you help me with my case"
-   - "current client" = Someone with an EXISTING case already being handled by the firm. Keywords: "my case", "update on my claim", "spoke with Victoria before", "following up", mentions case number or existing representation
-   - "provider" = Medical provider, doctor's office, hospital, physical therapist, chiropractor calling about records, bills, liens, or treatment. Keywords: "medical records", "treatment notes", "billing", "lien", "doctor's office", "hospital", "clinic"
-   - "insurance adjuster" = Insurance company representative. Keywords: "insurance adjuster", "claims adjuster", "settlement offer", "insurance company", mentions specific insurance carrier names
-   - "other" = Anyone else (solicitor, wrong number, general inquiry, spam, etc.)
+3. **Caller Type**: Intelligently infer from context. BE CONSERVATIVE - if unsure, use "other":
+   - "potential new client" = ONLY if someone is CLEARLY inquiring about legal services for a NEW personal injury case. They must mention: injury, accident, AND need for legal help. Examples: "I was in a car accident and need a lawyer", "I got hurt at work, can you help me?"
+   - "current client" = Someone with an EXISTING case already being handled by the firm. Keywords: "my case", "update on my claim", "spoke with Victoria before", mentions case/claim number
+   - "provider" = Medical provider calling about records, bills, liens, or treatment. Clear identification as doctor's office, hospital, clinic, etc.
+   - "insurance adjuster" = Insurance company representative calling about a claim. Must identify as adjuster or from insurance company.
+   - "other" = DEFAULT for: spam, solicitations, wrong numbers, vague inquiries, unclear purpose, robocalls, marketing, or anything that doesn't clearly fit above categories
 
 4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call
 5. **Action Items**: List specific follow-up actions needed
 
-IMPORTANT: The caller will NOT explicitly state their type. You must infer it from what they say about their situation.
+CRITICAL: Only classify as "potential new client" if you are HIGHLY CONFIDENT they have an injury/accident AND are seeking legal representation. When in doubt, use "other".
 
 Transcript:
 ${transcript}
@@ -141,11 +141,23 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
     console.log('  Final phone:', phoneNumber);
   }
   
+  // Extract recording URL from VAPI payload
+  const recordingUrl = payload.message?.call?.recordingUrl ||
+                      payload.call?.recordingUrl ||
+                      payload.message?.recordingUrl ||
+                      payload.recordingUrl ||
+                      null;
+  
+  if (recordingUrl) {
+    console.log(`🎤 Recording URL found: ${recordingUrl}`);
+  }
+  
   const finalResult = {
     ...result,
     callerPhone: phoneNumber,
     dateOfCall: callDate,
     timeOfCall: callTime,
+    recordingUrl: recordingUrl,
     processedAt: new Date().toISOString(),
   };
   
