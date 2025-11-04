@@ -58,7 +58,14 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   "callerType": "potential new client",
   "summary": "Detailed summary here",
   "actionItems": ["Action 1", "Action 2"]
-}`;
+}
+
+CRITICAL REQUIREMENTS:
+- NEVER return null, undefined, or empty strings for any field
+- If callerName cannot be determined, use "Unknown" (NOT null/empty)
+- If callerType is unclear, use "other" (NOT null/empty)
+- Always provide a summary, even if brief (NEVER null/empty)
+- If no action items, return empty array [] (NOT null)
 
   const gemini = getGemini();
   
@@ -88,7 +95,27 @@ Return your response in this JSON format (IMPORTANT: return ONLY valid JSON, no 
   const responseText = response.response.candidates[0].content.parts[0].text;
   
   // Parse JSON response
-  const result = JSON.parse(responseText);
+  let result = JSON.parse(responseText);
+  
+  // CRITICAL: Validate and sanitize Gemini response
+  // Never allow undefined/null values that will break emails
+  if (!result.callerName || result.callerName === 'null' || result.callerName.trim() === '') {
+    console.warn('⚠️  Gemini returned invalid callerName, defaulting to "Unknown"');
+    result.callerName = 'Unknown';
+  }
+  
+  if (!result.callerType || result.callerType === 'null' || result.callerType.trim() === '') {
+    console.warn('⚠️  Gemini returned invalid callerType, defaulting to "other"');
+    result.callerType = 'other';
+  }
+  
+  if (!result.summary || result.summary === 'null' || result.summary.trim() === '') {
+    console.warn('⚠️  Gemini returned invalid summary, using fallback');
+    result.summary = 'Call received but summary could not be generated. Please review the recording.';
+  }
+  
+  // Log the raw Gemini response for debugging
+  console.log('🤖 Raw Gemini response:', JSON.stringify(result, null, 2));
   
   // Extract date and time from VAPI payload metadata
   let callDate = result.dateOfCall;
