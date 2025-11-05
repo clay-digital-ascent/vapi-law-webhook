@@ -112,6 +112,12 @@ CRITICAL REQUIREMENTS:
   // Parse JSON response
   let result = JSON.parse(responseText);
   
+  // Handle case where Gemini returns an array instead of object
+  if (Array.isArray(result)) {
+    console.warn('⚠️  Gemini returned array instead of object, extracting first element');
+    result = result[0];
+  }
+  
   // CRITICAL: Validate and sanitize Gemini response
   // Never allow undefined/null values that will break emails
   if (!result.callerName || result.callerName === 'null' || result.callerName.trim() === '') {
