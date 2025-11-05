@@ -29,12 +29,23 @@ export async function summarizeCall(payload) {
 
 1. **Caller Name**: Extract from the conversation (or "Unknown" if not provided)
 2. **Caller Phone**: Extract if mentioned (or "Not provided")
-3. **Caller Type**: Intelligently infer from context. BE CONSERVATIVE - if unsure, use "other":
-   - "potential new client" = ONLY if someone is CLEARLY inquiring about legal services for a NEW personal injury case. They must mention: injury, accident, AND need for legal help. Examples: "I was in a car accident and need a lawyer", "I got hurt at work, can you help me?"
+3. **Caller Type**: BE EXTREMELY CONSERVATIVE. Default to "other" unless you have EXPLICIT EVIDENCE.
+   - "potential new client" = ONLY use this if ALL THREE conditions are met:
+     a) The caller explicitly states they were in an accident/injury ("I was in a car accident", "I got hurt", "I was injured")
+     b) The caller explicitly asks for legal help or representation ("I need a lawyer", "can you help me with my case", "I want to hire an attorney")
+     c) The caller is actually speaking and engaging in the conversation (NOT silent, NOT background noise, NOT disconnected)
+     
+     NEVER label as potential new client if:
+     - Call is silent or mostly silent
+     - Only background noise or music
+     - Caller doesn't speak or engage
+     - Vague inquiry without mentioning injury AND legal help
+     - Any uncertainty about the caller's intent
+   
    - "current client" = Someone with an EXISTING case already being handled by the firm. Keywords: "my case", "update on my claim", "spoke with Victoria before", mentions case/claim number
    - "provider" = Medical provider calling about records, bills, liens, or treatment. Clear identification as doctor's office, hospital, clinic, etc.
    - "insurance adjuster" = Insurance company representative calling about a claim. Must identify as adjuster or from insurance company.
-   - "other" = DEFAULT for: spam, solicitations, wrong numbers, vague inquiries, unclear purpose, robocalls, marketing, or anything that doesn't clearly fit above categories
+   - "other" = DEFAULT for EVERYTHING ELSE including: spam, solicitations, wrong numbers, vague inquiries, unclear purpose, robocalls, marketing, silent calls, hang-ups, background noise, or ANY call where you are not 100% certain of the category
 
 4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call. IMPORTANT: If the caller requests a callback, include ALL contact details they provide:
    - Phone number they want to be called back at (even if it's the same as caller phone)
@@ -44,7 +55,11 @@ export async function summarizeCall(payload) {
    
 5. **Action Items**: List specific follow-up actions needed
 
-CRITICAL: Only classify as "potential new client" if you are HIGHLY CONFIDENT they have an injury/accident AND are seeking legal representation. When in doubt, use "other".
+CRITICAL CLASSIFICATION RULES:
+1. NEVER label as "potential new client" unless the caller EXPLICITLY mentions BOTH an injury/accident AND explicitly asks for legal help
+2. If the call is silent, has only background noise, or the caller doesn't engage - ALWAYS use "other"
+3. When in ANY doubt whatsoever - use "other" (NOT potential new client)
+4. Better to mark 10 real clients as "other" than to mark 1 spam/silent call as "potential new client"
 
 Transcript:
 ${transcript}
