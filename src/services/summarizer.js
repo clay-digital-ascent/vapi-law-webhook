@@ -47,13 +47,13 @@ export async function summarizeCall(payload) {
    - "insurance adjuster" = Insurance company representative calling about a claim. Must identify as adjuster or from insurance company.
    - "other" = DEFAULT for EVERYTHING ELSE including: spam, solicitations, wrong numbers, vague inquiries, unclear purpose, robocalls, marketing, silent calls, hang-ups, background noise, or ANY call where you are not 100% certain of the category
 
-4. **Summary**: Write a detailed 2-4 sentence summary capturing the key points and reason for the call. IMPORTANT: If the caller requests a callback, include ALL contact details they provide:
+4. **Summary**: ALWAYS write a summary, even if the call is unclear or silent. For unclear/silent calls, describe what happened (e.g., "Call connected but caller did not speak", "Background noise only, no conversation", "Call disconnected immediately"). For normal calls, write a detailed 2-4 sentence summary capturing the key points and reason for the call. IMPORTANT: If the caller requests a callback, include ALL contact details they provide:
    - Phone number they want to be called back at (even if it's the same as caller phone)
    - Extension number if mentioned
    - Best time to call if specified
    - Any other callback instructions (e.g., "ask for John", "call after 3pm")
    
-5. **Action Items**: List specific follow-up actions needed
+5. **Action Items**: List specific follow-up actions needed. For unclear/silent calls, use empty array [].
 
 CRITICAL CLASSIFICATION RULES:
 1. NEVER label as "potential new client" unless the caller EXPLICITLY mentions BOTH an injury/accident AND explicitly asks for legal help
