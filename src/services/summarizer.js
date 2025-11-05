@@ -65,7 +65,7 @@ CRITICAL REQUIREMENTS:
 - If callerName cannot be determined, use "Unknown" (NOT null/empty)
 - If callerType is unclear, use "other" (NOT null/empty)
 - Always provide a summary, even if brief (NEVER null/empty)
-- If no action items, return empty array [] (NOT null)
+- If no action items, return empty array [] (NOT null)`;
 
   const gemini = getGemini();
   
